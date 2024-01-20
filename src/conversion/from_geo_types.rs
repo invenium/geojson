@@ -194,7 +194,7 @@ where
     T: CoordFloat,
 {
     line_string
-        .points_iter()
+        .points()
         .map(|point| create_point_type(&point))
         .collect()
 }
@@ -242,7 +242,7 @@ where
 {
     let mut coords = vec![polygon
         .exterior()
-        .points_iter()
+        .points()
         .map(|point| create_point_type(&point))
         .collect()];
 
@@ -269,9 +269,10 @@ where
 
 #[cfg(test)]
 mod tests {
+    use abi_stable::rvec;
     use crate::{GeoJson, Geometry, Value};
     use geo_types::{
-        Coordinate, GeometryCollection, Line, LineString, MultiLineString, MultiPoint,
+        Coord, GeometryCollection, Line, LineString, MultiLineString, MultiPoint,
         MultiPolygon, Point, Polygon, Rect, Triangle,
     };
 
@@ -305,7 +306,7 @@ mod tests {
         let p1 = Point::new(40.02f64, 116.34f64);
         let p2 = Point::new(13.02f64, 24.34f64);
 
-        let geo_multi_point = MultiPoint(vec![p1, p2]);
+        let geo_multi_point = MultiPoint(rvec![p1, p2]);
         let geojson_multi_point = Value::from(&geo_multi_point);
 
         if let Value::MultiPoint(c) = geojson_multi_point {
@@ -323,7 +324,7 @@ mod tests {
         let p1 = Point::new(40.02f64, 116.34f64);
         let p2 = Point::new(13.02f64, 24.34f64);
 
-        let geo_line_string = LineString::from(vec![p1, p2]);
+        let geo_line_string = LineString::from(rvec![p1, p2]);
         let geojson_line_point = Value::from(&geo_line_string);
 
         if let Value::LineString(c) = geojson_line_point {
@@ -356,9 +357,9 @@ mod tests {
 
     #[test]
     fn geo_triangle_conversion_test() {
-        let c1 = Coordinate { x: 0., y: 0. };
-        let c2 = Coordinate { x: 10., y: 20. };
-        let c3 = Coordinate { x: 20., y: -10. };
+        let c1 = Coord { x: 0., y: 0. };
+        let c2 = Coord { x: 10., y: 20. };
+        let c3 = Coord { x: 20., y: -10. };
 
         let triangle = Triangle(c1, c2, c3);
 
@@ -381,8 +382,8 @@ mod tests {
 
     #[test]
     fn geo_rect_conversion_test() {
-        let c1 = Coordinate { x: 0., y: 0. };
-        let c2 = Coordinate { x: 10., y: 20. };
+        let c1 = Coord { x: 0., y: 0. };
+        let c2 = Coord { x: 10., y: 20. };
 
         let rect = Rect::new(c1, c2);
 
@@ -412,10 +413,10 @@ mod tests {
         let p3 = Point::new(46.84f64, 160.95f64);
         let p4 = Point::new(42.02f64, 96.34f64);
 
-        let geo_line_string1 = LineString::from(vec![p1, p2]);
-        let geo_line_string2 = LineString::from(vec![p3, p4]);
+        let geo_line_string1 = LineString::from(rvec![p1, p2]);
+        let geo_line_string2 = LineString::from(rvec![p3, p4]);
 
-        let geo_multi_line_string = MultiLineString(vec![geo_line_string1, geo_line_string2]);
+        let geo_multi_line_string = MultiLineString(rvec![geo_line_string1, geo_line_string2]);
         let geojson_multi_line_point = Value::from(&geo_multi_line_string);
 
         if let Value::MultiLineString(c) = geojson_multi_line_point {
@@ -441,10 +442,10 @@ mod tests {
         let p5 = Point::new(100.9f64, 0.2f64);
         let p6 = Point::new(100.9f64, 0.7f64);
 
-        let geo_line_string1 = LineString::from(vec![p1, p2, p3, p1]);
-        let geo_line_string2 = LineString::from(vec![p4, p5, p6, p4]);
+        let geo_line_string1 = LineString::from(rvec![p1, p2, p3, p1]);
+        let geo_line_string2 = LineString::from(rvec![p4, p5, p6, p4]);
 
-        let geo_polygon = Polygon::new(geo_line_string1, vec![geo_line_string2]);
+        let geo_polygon = Polygon::new(geo_line_string1, rvec![geo_line_string2]);
         let geojson_polygon = Value::from(&geo_polygon);
 
         if let Value::Polygon(c) = geojson_polygon {
@@ -474,12 +475,12 @@ mod tests {
         let p5 = Point::new(101.0f64, 0.0f64);
         let p6 = Point::new(101.0f64, 1.0f64);
 
-        let geo_line_string1 = LineString::from(vec![p1, p2, p3, p1]);
-        let geo_line_string2 = LineString::from(vec![p4, p5, p6, p4]);
+        let geo_line_string1 = LineString::from(rvec![p1, p2, p3, p1]);
+        let geo_line_string2 = LineString::from(rvec![p4, p5, p6, p4]);
 
-        let geo_polygon1 = Polygon::new(geo_line_string1, vec![]);
-        let geo_polygon2 = Polygon::new(geo_line_string2, vec![]);
-        let geo_multi_polygon = MultiPolygon(vec![geo_polygon1, geo_polygon2]);
+        let geo_polygon1 = Polygon::new(geo_line_string1, rvec![]);
+        let geo_polygon2 = Polygon::new(geo_line_string2, rvec![]);
+        let geo_multi_polygon = MultiPolygon(rvec![geo_polygon1, geo_polygon2]);
         let geojson_multi_polygon = Value::from(&geo_multi_polygon);
 
         if let Value::MultiPolygon(c) = geojson_multi_polygon {
@@ -507,16 +508,16 @@ mod tests {
         let p3 = Point::new(101.0f64, 1.0f64);
         let p4 = Point::new(102.0f64, 0.0f64);
         let p5 = Point::new(101.0f64, 0.0f64);
-        let geo_multi_point = MultiPoint(vec![p1, p2]);
-        let geo_multi_line_string = MultiLineString(vec![
-            LineString::from(vec![p1, p2]),
-            LineString::from(vec![p2, p3]),
+        let geo_multi_point = MultiPoint(rvec![p1, p2]);
+        let geo_multi_line_string = MultiLineString(rvec![
+            LineString::from(rvec![p1, p2]),
+            LineString::from(rvec![p2, p3]),
         ]);
-        let geo_multi_polygon = MultiPolygon(vec![
-            Polygon::new(LineString::from(vec![p3, p4, p5, p3]), vec![]),
-            Polygon::new(LineString::from(vec![p1, p5, p3, p1]), vec![]),
+        let geo_multi_polygon = MultiPolygon(rvec![
+            Polygon::new(LineString::from(rvec![p3, p4, p5, p3]), rvec![]),
+            Polygon::new(LineString::from(rvec![p1, p5, p3, p1]), rvec![]),
         ]);
-        let geo_geometry_collection = GeometryCollection(vec![
+        let geo_geometry_collection = GeometryCollection(rvec![
             geo_types::Geometry::MultiPoint(geo_multi_point),
             geo_types::Geometry::MultiLineString(geo_multi_line_string),
             geo_types::Geometry::MultiPolygon(geo_multi_polygon),

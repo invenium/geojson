@@ -19,6 +19,7 @@ use crate::geojson::GeoJson::{Feature, FeatureCollection, Geometry};
 
 use crate::Result;
 use std::convert::TryInto;
+use abi_stable::rvec;
 
 #[cfg(test)]
 macro_rules! assert_almost_eq {
@@ -96,12 +97,12 @@ where
         )),
         Feature(feature) => {
             if let Some(geometry) = &feature.geometry {
-                Ok(GeometryCollection(vec![geometry.clone().try_into()?]))
+                Ok(GeometryCollection(rvec![geometry.clone().try_into()?]))
             } else {
-                Ok(GeometryCollection(vec![]))
+                Ok(GeometryCollection(rvec![]))
             }
         }
-        Geometry(geometry) => Ok(GeometryCollection(vec![geometry.clone().try_into()?])),
+        Geometry(geometry) => Ok(GeometryCollection(rvec![geometry.clone().try_into()?])),
     }
 }
 
