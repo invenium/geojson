@@ -7,6 +7,8 @@ use crate::{
 };
 use crate::{Error, Result};
 use std::convert::{TryFrom, TryInto};
+use abi_stable::std_types::RVec;
+use geo_types::_alloc::rvec;
 
 #[cfg_attr(docsrs, doc(cfg(feature = "geo-types")))]
 impl<T> TryFrom<&geometry::Value> for geo_types::Point<T>
@@ -178,7 +180,7 @@ where
                         .iter()
                         .cloned()
                         .map(|geom| geom.try_into())
-                        .collect::<Result<Vec<geo_types::Geometry<T>>>>()?,
+                        .collect::<Result<RVec<geo_types::Geometry<T>>>>()?,
                 ));
                 Ok(gc)
             }
@@ -273,11 +275,11 @@ where
     }
 }
 
-fn create_geo_coordinate<T>(point_type: &PointType) -> geo_types::Coordinate<T>
+fn create_geo_coordinate<T>(point_type: &PointType) -> geo_types::Coord<T>
 where
     T: CoordFloat,
 {
-    geo_types::Coordinate {
+    geo_types::Coord {
         x: T::from(point_type[0]).unwrap(),
         y: T::from(point_type[1]).unwrap(),
     }
@@ -329,7 +331,7 @@ where
         .unwrap_or_else(|| create_geo_line_string(&vec![]));
 
     let interiors = if polygon_type.len() < 2 {
-        vec![]
+        rvec![]
     } else {
         polygon_type[1..]
             .iter()
@@ -365,6 +367,7 @@ mod tests {
     use serde_json::json;
 
     use std::convert::TryInto;
+    use abi_stable::rvec;
 
     #[test]
     fn geojson_point_conversion_test() {
@@ -662,15 +665,15 @@ mod tests {
         let geo_geom = geo_types::Geometry::try_from(feature).unwrap();
 
         let expected =
-            geo_types::Geometry::GeometryCollection(geo_types::GeometryCollection(vec![
+            geo_types::Geometry::GeometryCollection(geo_types::GeometryCollection(rvec![
                 geo_types::Geometry::Polygon(geo_types::Polygon::new(
-                    geo_types::LineString::new(vec![
+                    geo_types::LineString::new(rvec![
                         geo_types::coord!(x: 1.0, y: 1.0),
                         geo_types::coord!(x: 2.0, y: 2.0),
                         geo_types::coord!(x: 3.0, y: 1.0),
                         geo_types::coord!(x: 1.0, y: 1.0),
                     ]),
-                    vec![],
+                    rvec![],
                 )),
             ]));
         assert_eq!(geo_geom, expected);
